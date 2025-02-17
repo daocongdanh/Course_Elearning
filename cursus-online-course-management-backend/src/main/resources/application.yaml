@@ -1,0 +1,89 @@
+#---------------------------------------------------------------
+#-----------------------  APPLICATION  -------------------------
+spring:
+  application:
+    name: cursus-online-course-management
+  #---------------------------------------------------------------
+  #------------------------  MULTIPART  --------------------------
+  servlet:
+    multipart:
+      max-file-size: 1GB
+      max-request-size: 1GB
+  #---------------------------------------------------------------
+  #---------------------------  SSL  -----------------------------
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-password: <password>
+    key-store-type: PKCS12
+    key-alias: <alias>
+  #---------------------------------------------------------------
+  #---------------------------  JPA  -----------------------------
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: true
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/course
+    username: postgres
+    password: 123456
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  #---------------------------------------------------------------
+  #------------------------  THYMELEAF  --------------------------
+  thymeleaf:
+    prefix: classpath:/templates/
+    suffix: .html
+
+  #---------------------------------------------------------------
+  #------------------------  MAIL SENDER  ------------------------
+  mail:
+    host: smtp.gmail.com
+    username: kiennhhe163054@fpt.edu.vn
+    password: stjq gyfp oigj cqdm
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+jwt:
+#  secret: mot_khoa_bao_mat_day_du_va_32_bytes_tro_len
+  secret: XeKCntPJuk/iJoaxpv9ifO4aj+6TXWpL123R9b47aqH0=
+  expiration-milliseconds: 86400000
+#  expiration-milliseconds: 120000
+  refresh-expiration-time: 259200000
+  expiration-verify-email: 300000
+
+#---------------------------------------------------------------
+#--------------------------  PAYPAL  ---------------------------
+paypal:
+  mode: sandbox
+  client-id: AQHBTdH003tPTR_pJveDZThQL3taFt1jdow2O5oO33gXkUiJpGrugZkomYmWD2jVMko-6Py-ntlBRxgU
+  secret-key: EADrcM_JF9dX6yKm-p0JEVsIc-RTm20NicaWBzBUpYUOeOPzCR9VbI4ho6RmR5bU3M8VaIQjN7rObFob
+
+#---------------------------------------------------------------
+#--------------------------  AMAZON  ---------------------------
+cloudinary:
+  cloudname: dpovm8g87
+  apikey: 186181545868881
+  apisecret: Z3ofL2rhN2f9nOKL1ZxW-M26OM4
+firebase:
+  bucketName: my-firebase-project.appspot.com
+
+domain:
+  backend: http://localhost:8080
+  frontend: http://localhost:3000
+
+upload:
+  video-src: src/main/resources/static
+  video-target: build/resources/static

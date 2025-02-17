@@ -1,0 +1,16 @@
+package group.project.cursusonlinecoursemanagement.user.domain.dto.payload.response;
+
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class ChartStatisticalUser {
+    String month;
+    int numberStudent;
+    int numberInstructor;
+}
