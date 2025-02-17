@@ -31,4 +31,7 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
     @Query("SELECT new group.project.cursusonlinecoursemanagement.user.domain.dto.payload.response.CourseEnrollmentCountByDate(c.createdDate, COUNT(c), 0) " +
             "FROM Course c WHERE c.createdDate >= :startDate GROUP BY c.createdDate")
     List<CourseEnrollmentCountByDate> findCourseCountByDate(@Param("startDate") LocalDateTime startDate);
+
+    @Query("SELECT c FROM Course c WHERE LOWER(c.description) LIKE LOWER(CONCAT('%', :description, '%'))")
+    List<Course> searchByDescription(@Param("description") String description);
 }

@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 public class BMIHistoryStatistics {
-    private LocalDate day;
+    private String date;
     private Double weight;
     private Double height;
     private Double bmi;

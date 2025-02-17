@@ -54,6 +54,12 @@ public class CourseController {
         List<GetCourseResponse> courses = courseService.getAllCourses();
         return new ResponseEntity<>(courses, HttpStatus.OK);
     }
+
+    @GetMapping("/searchCoursesByDesc")
+    public ResponseEntity<List<GetCourseResponse>> searchCoursesByDesc(@RequestParam String desc) {
+        List<GetCourseResponse> courses = courseService.searchCoursesByDesc(desc);
+        return new ResponseEntity<>(courses, HttpStatus.OK);
+    }
     
     /**
      * Retrieves all instructor's courses from the service.

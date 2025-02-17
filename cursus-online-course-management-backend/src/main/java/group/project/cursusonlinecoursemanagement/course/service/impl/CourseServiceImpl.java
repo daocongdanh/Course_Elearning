@@ -357,6 +357,14 @@ public class CourseServiceImpl implements CourseService {
         return GetCourseResponse.convertEntityToResponseBasis(course);
     }
 
+    @Override
+    public List<GetCourseResponse> searchCoursesByDesc(String desc) {
+        if(desc.isEmpty())
+            return new ArrayList<>();
+        List<Course> courses = courseRepository.searchByDescription(desc);
+        return getGetCourseResponses(courses);
+    }
+
     public Double calculateCourseProgress(Course course, String email) {
         List<Lesson> lessons = course.getLessons().stream().filter(Lesson::getIsPublished).toList();
         int countCompletedLessons = lessons.stream()

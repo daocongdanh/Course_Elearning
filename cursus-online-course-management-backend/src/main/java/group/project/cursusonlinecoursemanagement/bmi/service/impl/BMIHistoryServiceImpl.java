@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,10 +57,11 @@ public class BMIHistoryServiceImpl implements BMIHistoryService {
     @Override
     public List<BMIHistoryStatistics> getBMIDaily(int year, int month, UUID userId) {
         List<Object[]> results = bmiHistoryRepository.findDailyBMI(year, month, userId);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         return results.stream().map(row -> BMIHistoryStatistics.builder()
-                .day(((LocalDateTime) row[0]).toLocalDate())
+                .date(((LocalDateTime) row[0]).toLocalDate().format(formatter))
                 .weight((Double) row[1])
-                .height((Double) row[2])
+                .height((Double) row[2] * 100)
                 .bmi((Double) row[3])
                 .build())
                 .toList();

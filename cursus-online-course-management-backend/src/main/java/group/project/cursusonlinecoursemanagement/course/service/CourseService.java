@@ -43,4 +43,6 @@ public interface CourseService {
     GetCourseResponse getCourseByIdByUser(UUID courseId);
 
     GetCourseResponse getStudentOwnedCourseWithLessonsAndProgressById(String email, UUID courseId);
+
+    List<GetCourseResponse> searchCoursesByDesc(String desc);
 }
