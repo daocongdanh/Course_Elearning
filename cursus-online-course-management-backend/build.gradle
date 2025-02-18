@@ -46,6 +46,8 @@ dependencies {
     implementation group: 'com.paypal.sdk', name: 'paypal-core', version: '1.7.2'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation group: 'com.itextpdf', name: 'itextpdf', version: '5.5.13.3'
+    // https://mvnrepository.com/artifact/vn.payos/payos-java
+    implementation 'vn.payos:payos-java:1.0.1'
     implementation 'com.cloudinary:cloudinary-http44:1.34.0'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'

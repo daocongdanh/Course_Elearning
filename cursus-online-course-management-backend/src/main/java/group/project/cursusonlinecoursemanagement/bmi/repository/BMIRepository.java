@@ -11,11 +11,11 @@ import java.util.Optional;
 @Repository
 public interface BMIRepository extends JpaRepository<BMI, Long> {
     @Query("SELECT COUNT(b) FROM BMI b WHERE " +
-            "(b.minBmi <= :maxBmi AND b.maxBmi >= :minBmi)")
+            "(b.minBmi < :maxBmi AND b.maxBmi > :minBmi)")
     Long countOverlappingBMIs1(@Param("minBmi") Double minBmi, @Param("maxBmi") Double maxBmi);
 
     @Query("SELECT COUNT(b) FROM BMI b WHERE " +
-            "(b.minBmi <= :maxBmi AND b.maxBmi >= :minBmi) " +
+            "(b.minBmi < :maxBmi AND b.maxBmi > :minBmi) " +
             "AND b.bmiId <> :id")
     Long countOverlappingBMIs2(@Param("minBmi") Double minBmi,
                               @Param("maxBmi") Double maxBmi,

@@ -3,6 +3,7 @@ package group.project.cursusonlinecoursemanagement.payment.service;
 import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
 import group.project.cursusonlinecoursemanagement.course.domain.dto.payload.response.EnrollmentResponse;
+import group.project.cursusonlinecoursemanagement.payment.domain.dto.request.CreateEnrollRequestPayment;
 import group.project.cursusonlinecoursemanagement.payment.domain.dto.request.EnrollRequestPayment;
 import group.project.cursusonlinecoursemanagement.payment.domain.dto.response.GetPaymentRequestResponse;
 
@@ -28,4 +29,6 @@ public interface PaymentService {
             String payerId,
             UUID paymentRequestId
     ) throws PayPalRESTException;
+
+    String createEnrollRequestPayment(CreateEnrollRequestPayment createEnrollRequestPayment);
 }

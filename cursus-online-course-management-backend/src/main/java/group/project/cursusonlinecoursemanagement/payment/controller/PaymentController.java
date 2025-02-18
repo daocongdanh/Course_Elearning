@@ -4,7 +4,10 @@ import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
+import group.project.cursusonlinecoursemanagement.course.domain.dto.payload.request.EnrollmentRequest;
 import group.project.cursusonlinecoursemanagement.course.domain.dto.payload.request.RefundPaymentRequest;
+import group.project.cursusonlinecoursemanagement.course.service.EnrollmentService;
+import group.project.cursusonlinecoursemanagement.payment.domain.dto.request.CreateEnrollRequestPayment;
 import group.project.cursusonlinecoursemanagement.payment.domain.dto.request.EnrollRequestExecutePayment;
 import group.project.cursusonlinecoursemanagement.payment.domain.dto.request.EnrollRequestPayment;
 import group.project.cursusonlinecoursemanagement.payment.domain.dto.request.InstructorRefundExecutePayment;
@@ -14,6 +17,8 @@ import group.project.cursusonlinecoursemanagement.user.domain.entity.Status;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,6 +26,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import com.paypal.api.payments.*;
+
+import java.io.IOException;
 import java.util.UUID;
 
 @Tag(
@@ -31,9 +38,12 @@ import java.util.UUID;
 public class PaymentController {
     private final PaymentService paymentService;
     private final APIContext apiContext;
-    public PaymentController(PaymentService paymentService, APIContext apiContext) {
+    private final EnrollmentService enrollmentService;
+    public PaymentController(PaymentService paymentService, APIContext apiContext,
+                             EnrollmentService enrollmentService) {
         this.paymentService = paymentService;
         this.apiContext = apiContext;
+        this.enrollmentService = enrollmentService;
     }
 
     @PreAuthorize("hasRole('ROLE_STUDENT')")
@@ -55,6 +65,8 @@ public class PaymentController {
         }
         return new ResponseEntity<>("No approval URL found", HttpStatus.BAD_REQUEST);
     }
+
+
 
     @PreAuthorize("hasRole('ROLE_STUDENT')")
     @UserStatus(unAllowedStatuses = {Status.BLOCK_ROLE_STUDENT,Status.BLOCK_ACCOUNT})
@@ -103,5 +115,41 @@ public class PaymentController {
                 paymentService.executeRefundPayment(executePayment.getPaymentId(), executePayment.getPayerId(), executePayment.getPaymentRequestId()),
                 HttpStatus.OK
         );
+    }
+
+
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    @UserStatus(unAllowedStatuses = {Status.BLOCK_ROLE_STUDENT,Status.BLOCK_ACCOUNT})
+    @PostMapping("/auth/create-payment")
+    @Operation(
+            summary = "Create Enroll Request Payment REST API",
+            description = "Create Enroll Request Payment REST API is used to create payment request for enrolling in a course"
+    )
+    @SecurityRequirement(
+            name = "Bearer Authentication"
+    )
+    public ResponseEntity<?> createEnrollRequestPayment(
+            @RequestBody CreateEnrollRequestPayment createEnrollRequestPayment) {
+        String url = paymentService.createEnrollRequestPayment(createEnrollRequestPayment);
+        return new ResponseEntity<>(url, HttpStatus.OK);
+    }
+    @GetMapping("/success")
+    public ResponseEntity<?> handlePaymentSuccess(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        UUID userId = UUID.fromString(request.getParameter("userId"));
+        UUID courseId = UUID.fromString(request.getParameter("courseId"));
+        enrollmentService.createEnrollment(EnrollmentRequest.builder()
+                        .courseId(courseId)
+                        .userId(userId)
+                .build());
+        response.sendRedirect("http://localhost:3000/dashboard");
+        return new ResponseEntity<>("Payment successful", HttpStatus.OK);
+    }
+
+    @GetMapping("/cancel")
+    public ResponseEntity<?> handlePaymentCancel(HttpServletRequest request, HttpServletResponse response)
+            throws IOException{
+        response.sendRedirect("http://localhost:3000/dashboard");
+        return new ResponseEntity<>("Payment cancel", HttpStatus.OK);
     }
 }

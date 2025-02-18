@@ -87,3 +87,10 @@ domain:
 upload:
   video-src: src/main/resources/static
   video-target: build/resources/static
+
+payos:
+  client-id: 79fcf7d6-b655-4169-a366-1b1fcb9e2760
+  api-key: 9023dbd5-da20-4ae5-b1ce-294b16d92717
+  checksum-key: 843d68dc6f5d057bf96e5973832a02e212b45a91e504cbde8002370d57b66e02
+  return-url: http://localhost:8080/api/payment/success
+  cancel-url: http://localhost:8080/api/payment/cancel

@@ -5,11 +5,17 @@ import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
 import group.project.cursusonlinecoursemanagement.course.domain.dto.payload.response.EnrollmentResponse;
 import group.project.cursusonlinecoursemanagement.course.service.EnrollmentService;
+import group.project.cursusonlinecoursemanagement.payment.domain.dto.request.CreateEnrollRequestPayment;
 import group.project.cursusonlinecoursemanagement.payment.domain.dto.request.EnrollRequestPayment;
 import group.project.cursusonlinecoursemanagement.payment.domain.dto.response.GetPaymentRequestResponse;
 import group.project.cursusonlinecoursemanagement.payment.service.PaymentRequestService;
 import group.project.cursusonlinecoursemanagement.payment.service.PaymentService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import vn.payos.PayOS;
+import vn.payos.type.CheckoutResponseData;
+import vn.payos.type.ItemData;
+import vn.payos.type.PaymentData;
 
 import java.util.*;
 
@@ -19,10 +25,19 @@ public class PaymentServiceImpl implements PaymentService {
     private final APIContext apiContext;
     private final EnrollmentService enrollmentService;
     private final PaymentRequestService paymentRequestService;
-    public PaymentServiceImpl(APIContext apiContext, EnrollmentService enrollmentService, PaymentRequestService paymentRequestService) {
+    private final PayOS payOS;
+
+    @Value("${payos.return-url}")
+    private String returnUrl;
+    @Value("${payos.cancel-url}")
+    private String cancelUrl;
+
+    public PaymentServiceImpl(APIContext apiContext, EnrollmentService enrollmentService,
+                              PaymentRequestService paymentRequestService, PayOS payOS) {
         this.apiContext = apiContext;
         this.enrollmentService = enrollmentService;
         this.paymentRequestService = paymentRequestService;
+        this.payOS = payOS;
     }
 
     public Payment createPayment(
@@ -193,5 +208,34 @@ public class PaymentServiceImpl implements PaymentService {
         Payment executedPayment = payment.execute(apiContext, paymentExecution);
 
         return paymentRequestService.isDone(paymentRequestId);
+    }
+
+    @Override
+    public String createEnrollRequestPayment(CreateEnrollRequestPayment createEnrollRequestPayment) {
+        try{
+            String currentTimeString = String.valueOf(new Date().getTime());
+            long orderCode = Long.parseLong(currentTimeString.substring(currentTimeString.length() - 6));
+            ItemData item = ItemData.builder()
+                    .name(createEnrollRequestPayment.getTitle())
+                    .quantity(1)
+                    .price(createEnrollRequestPayment.getAmount().intValue())
+                    .build();
+            PaymentData paymentData = PaymentData.builder()
+                    .orderCode(orderCode)
+                    .amount(createEnrollRequestPayment.getAmount().intValue())
+                    .description(createEnrollRequestPayment.getDescription())
+                    .returnUrl(returnUrl + "?userId=" + createEnrollRequestPayment.getUserId()
+                            + "&courseId=" + createEnrollRequestPayment.getCourseId())
+                    .cancelUrl(cancelUrl)
+                    .item(item).build();
+
+            CheckoutResponseData data = payOS.createPaymentLink(paymentData);
+            return data.getCheckoutUrl();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            System.out.println("------------Lỗi payment----------");
+            return null;
+        }
     }
 }

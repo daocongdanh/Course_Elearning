@@ -66,6 +66,7 @@ public class BMIServiceImpl implements BMIService {
         bmi.setAdvice(bmiRequest.getAdvice());
 
         bmiRepository.save(bmi);
+
         return BMIResponse.convertEntityToResponse(bmi);
     }
 
