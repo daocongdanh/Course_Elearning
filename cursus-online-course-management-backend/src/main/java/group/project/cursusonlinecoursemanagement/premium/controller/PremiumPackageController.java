@@ -34,11 +34,13 @@ public class PremiumPackageController {
     }
 
     @GetMapping("")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER') or hasRole('ROLE_INSTRUCTOR')")
     public ResponseEntity<List<PremiumPackageResponse>> getAllPremiumPackages(){
         return new ResponseEntity<>(premiumPackageService.getAllPremiumPackages(), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_USER') or hasRole('ROLE_INSTRUCTOR')")
     public ResponseEntity<PremiumPackageResponse> getPremiumPackageById(@PathVariable Long id){
         return new ResponseEntity<>(premiumPackageService.getPremiumPackageById(id), HttpStatus.OK);
     }

@@ -22,7 +22,9 @@ public class Endpoints {
             "/api/bmi/.*",
             "/api/bmi",
             "/api/bmi-history",
-            "/api/bmi-history/.*"
+            "/api/bmi-history/.*",
+            "/api/premium-package",
+            "/api/premium-package/.*",
     };
 
     public static final String[] ALLOWED_ORIGINS = {
