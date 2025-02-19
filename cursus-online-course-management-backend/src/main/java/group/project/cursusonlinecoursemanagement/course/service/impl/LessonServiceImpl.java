@@ -148,7 +148,7 @@ public class LessonServiceImpl implements LessonService {
                     () -> new ResourceNotFoundException("Lesson", "id", String.valueOf(lessonId))
             );
             String url = fileUtil.upload(file);
-            lesson.setKeyVideo("http://localhost:8080/" + url);
+            lesson.setKeyVideo(url);
             lessonRepository.save(lesson);
             //Mapper model response
             GetLessonResponse getLessonResponse = GetLessonResponse.convertEntityToResponse(lesson);

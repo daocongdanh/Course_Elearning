@@ -12,6 +12,8 @@ import group.project.cursusonlinecoursemanagement.payment.domain.dto.request.Enr
 import group.project.cursusonlinecoursemanagement.payment.domain.dto.request.EnrollRequestPayment;
 import group.project.cursusonlinecoursemanagement.payment.domain.dto.request.InstructorRefundExecutePayment;
 import group.project.cursusonlinecoursemanagement.payment.service.PaymentService;
+import group.project.cursusonlinecoursemanagement.premium.domain.dto.request.CreatePaymentPremium;
+import group.project.cursusonlinecoursemanagement.premium.service.UserPremiumService;
 import group.project.cursusonlinecoursemanagement.shared.permission.user.UserStatus;
 import group.project.cursusonlinecoursemanagement.user.domain.entity.Status;
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 import com.paypal.api.payments.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Tag(
@@ -39,11 +42,14 @@ public class PaymentController {
     private final PaymentService paymentService;
     private final APIContext apiContext;
     private final EnrollmentService enrollmentService;
+    private final UserPremiumService userPremiumService;
     public PaymentController(PaymentService paymentService, APIContext apiContext,
-                             EnrollmentService enrollmentService) {
+                             EnrollmentService enrollmentService,
+                             UserPremiumService userPremiumService) {
         this.paymentService = paymentService;
         this.apiContext = apiContext;
         this.enrollmentService = enrollmentService;
+        this.userPremiumService = userPremiumService;
     }
 
     @PreAuthorize("hasRole('ROLE_STUDENT')")
@@ -133,16 +139,36 @@ public class PaymentController {
         String url = paymentService.createEnrollRequestPayment(createEnrollRequestPayment);
         return new ResponseEntity<>(url, HttpStatus.OK);
     }
+    @PreAuthorize("hasRole('ROLE_STUDENT')")
+    @UserStatus(unAllowedStatuses = {Status.BLOCK_ROLE_STUDENT,Status.BLOCK_ACCOUNT})
+    @PostMapping("/auth/create-payment-premium")
+    public ResponseEntity<?> createPremiumPayment(
+            @RequestBody CreatePaymentPremium createPaymentPremium) {
+        String url = paymentService.createPremiumPayment(createPaymentPremium);
+        return new ResponseEntity<>(url, HttpStatus.OK);
+    }
+
     @GetMapping("/success")
     public ResponseEntity<?> handlePaymentSuccess(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        UUID userId = UUID.fromString(request.getParameter("userId"));
-        UUID courseId = UUID.fromString(request.getParameter("courseId"));
-        enrollmentService.createEnrollment(EnrollmentRequest.builder()
-                        .courseId(courseId)
-                        .userId(userId)
-                .build());
-        response.sendRedirect("http://localhost:3000/dashboard");
+        String type = request.getParameter("type");
+        if(type.equals("enrollment")){
+            UUID userId = UUID.fromString(request.getParameter("userId"));
+            UUID courseId = UUID.fromString(request.getParameter("courseId"));
+            enrollmentService.createEnrollment(EnrollmentRequest.builder()
+                    .courseId(courseId)
+                    .userId(userId)
+                    .build());
+            response.sendRedirect("http://localhost:3000/dashboard");
+        }
+        else if(type.equals("premium")){
+            UUID userId = UUID.fromString(request.getParameter("userId"));
+            BigDecimal totalPrice = new BigDecimal(request.getParameter("price"));
+            int durationMonths = Integer.parseInt(request.getParameter("duration"));
+            userPremiumService.createUserPremium(userId, totalPrice, durationMonths);
+            response.sendRedirect("http://localhost:3000/dashboard");
+        }
+
         return new ResponseEntity<>("Payment successful", HttpStatus.OK);
     }
 

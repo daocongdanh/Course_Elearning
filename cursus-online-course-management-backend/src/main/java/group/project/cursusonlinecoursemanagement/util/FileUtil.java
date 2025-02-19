@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,34 +16,51 @@ import java.util.UUID;
 
 @Component
 public class FileUtil {
-    @Value("${upload.video-src}")
-    private String uploadSrc;
-    @Value("${upload.video-target}")
-    private String uploadTarget;
+    public static final String UPLOAD_FOLDER = "uploads";
+    public static final String BASE_URL = "http://localhost:8080";
 
-    private String generateUniqueFileName(MultipartFile file){
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(file.getOriginalFilename()));
-        return UUID.randomUUID().toString() + "_" + fileName;
+    public String upload(MultipartFile file) {
+
+        try {
+            // Tạo tên tệp duy nhất với UUID
+            String fileName = UUID.randomUUID().toString();
+
+            // Tạo đường dẫn lưu tệp (/uploads/fileName)
+            Path path = Paths.get(UPLOAD_FOLDER + File.separator + fileName);
+
+            // Lưu tệp
+            Files.copy(file.getInputStream(), path);
+
+            return BASE_URL + File.separator + UPLOAD_FOLDER + File.separator + fileName;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Không thể tải lên tệp");
+        }
     }
 
-    public String upload(MultipartFile file){
-        if(file == null)
-            return "";
-        try{
-            String uniqueFileName = generateUniqueFileName(file);
-            Path uploadSrc = Paths.get(this.uploadSrc);
-//            Path uploadTarget = Paths.get(this.uploadTarget);
+    public void deleteFile(String fileUrl) {
+        try {
+            String fileName = extractFileNameFromUrl(fileUrl);
 
-            Path destinationSrc = Paths.get(uploadSrc.toString(),uniqueFileName);
-//            Path destinationTarget = Paths.get(uploadTarget.toString(),uniqueFileName);
+            Path filePath = Paths.get(UPLOAD_FOLDER + File.separator + fileName);
 
-            Files.copy(file.getInputStream(), destinationSrc, StandardCopyOption.REPLACE_EXISTING);
-//            Files.copy(file.getInputStream(), destinationTarget, StandardCopyOption.REPLACE_EXISTING);
+            if (!Files.exists(filePath)) {
+                throw new RuntimeException("Tệp không tồn tại: " + fileName);
+            }
 
-            return uniqueFileName;
+            Files.delete(filePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Không thể xóa tệp: " + fileUrl);
         }
-        catch (Exception e){
-            throw new RuntimeException(e.getMessage());
+    }
+
+    private String extractFileNameFromUrl(String fileUrl) {
+        if (fileUrl == null || !fileUrl.startsWith(BASE_URL)) {
+            throw new IllegalArgumentException("URL không hợp lệ: " + fileUrl);
         }
+
+        String prefix = BASE_URL + "/" + UPLOAD_FOLDER + "/";
+        return fileUrl.replace(prefix, "");
     }
 }

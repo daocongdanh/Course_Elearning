@@ -10,6 +10,7 @@ import group.project.cursusonlinecoursemanagement.payment.domain.dto.request.Enr
 import group.project.cursusonlinecoursemanagement.payment.domain.dto.response.GetPaymentRequestResponse;
 import group.project.cursusonlinecoursemanagement.payment.service.PaymentRequestService;
 import group.project.cursusonlinecoursemanagement.payment.service.PaymentService;
+import group.project.cursusonlinecoursemanagement.premium.domain.dto.request.CreatePaymentPremium;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import vn.payos.PayOS;
@@ -225,10 +226,42 @@ public class PaymentServiceImpl implements PaymentService {
                     .amount(createEnrollRequestPayment.getAmount().intValue())
                     .description(createEnrollRequestPayment.getDescription())
                     .returnUrl(returnUrl + "?userId=" + createEnrollRequestPayment.getUserId()
-                            + "&courseId=" + createEnrollRequestPayment.getCourseId())
+                            + "&courseId=" + createEnrollRequestPayment.getCourseId()
+                            + "&type=enrollment")
                     .cancelUrl(cancelUrl)
                     .item(item).build();
 
+            CheckoutResponseData data = payOS.createPaymentLink(paymentData);
+            return data.getCheckoutUrl();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            System.out.println("------------Lỗi payment----------");
+            return null;
+        }
+    }
+
+    @Override
+    public String createPremiumPayment(CreatePaymentPremium createPaymentPremium) {
+        try{
+            String currentTimeString = String.valueOf(new Date().getTime());
+            long orderCode = Long.parseLong(currentTimeString.substring(currentTimeString.length() - 6));
+            ItemData item = ItemData.builder()
+                    .name("Premium Package")
+                    .quantity(1)
+                    .price(createPaymentPremium.getTotalPrice().intValue())
+                    .build();
+
+            PaymentData paymentData = PaymentData.builder()
+                    .orderCode(orderCode)
+                    .amount(createPaymentPremium.getTotalPrice().intValue())
+                    .description("Premium Package")
+                    .returnUrl(returnUrl + "?userId=" + createPaymentPremium.getUserId()
+                            + "&price=" + createPaymentPremium.getTotalPrice()
+                            + "&duration=" + createPaymentPremium.getDurationMonths()
+                            + "&type=premium")
+                    .cancelUrl(cancelUrl)
+                    .item(item).build();
             CheckoutResponseData data = payOS.createPaymentLink(paymentData);
             return data.getCheckoutUrl();
         }

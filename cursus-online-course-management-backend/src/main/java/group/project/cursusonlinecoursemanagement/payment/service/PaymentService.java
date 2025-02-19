@@ -6,6 +6,7 @@ import group.project.cursusonlinecoursemanagement.course.domain.dto.payload.resp
 import group.project.cursusonlinecoursemanagement.payment.domain.dto.request.CreateEnrollRequestPayment;
 import group.project.cursusonlinecoursemanagement.payment.domain.dto.request.EnrollRequestPayment;
 import group.project.cursusonlinecoursemanagement.payment.domain.dto.response.GetPaymentRequestResponse;
+import group.project.cursusonlinecoursemanagement.premium.domain.dto.request.CreatePaymentPremium;
 
 import java.util.UUID;
 
@@ -31,4 +32,6 @@ public interface PaymentService {
     ) throws PayPalRESTException;
 
     String createEnrollRequestPayment(CreateEnrollRequestPayment createEnrollRequestPayment);
+
+    String createPremiumPayment(CreatePaymentPremium createPaymentPremium);
 }

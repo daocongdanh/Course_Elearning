@@ -20,7 +20,6 @@ public class BMIController {
 
     @PostMapping("")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-
     public ResponseEntity<BMIResponse> createBMI(@Valid @RequestBody BMIRequest bmiRequest){
         return new ResponseEntity<>(bmiService.createBMI(bmiRequest), HttpStatus.CREATED);
     }
