@@ -51,7 +51,7 @@ public class UserPremiumServiceImpl implements UserPremiumService {
         }
         if(userPremium != null){
             userPremiumRepository.save(userPremium);
-            return UserPremiumResponse.convertEntityToResponse(userPremium);
+            return UserPremiumResponse.convertEntityToResponse(userPremium, false);
         }
         return null;
     }
@@ -62,6 +62,15 @@ public class UserPremiumServiceImpl implements UserPremiumService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "userId", userId.toString()));
 
         Optional<UserPremium> optionalUserPremium = userPremiumRepository.findByUser(user);
-        return optionalUserPremium.map(UserPremiumResponse::convertEntityToResponse).orElse(null);
-    }
+        if(optionalUserPremium.isEmpty())
+            return UserPremiumResponse.convertEntityToResponse(null, false);
+        else{
+            UserPremium userPremium = optionalUserPremium.get();
+            if(userPremium.getEndDate().isBefore(LocalDate.now())){
+                userPremiumRepository.delete(userPremium);
+                return UserPremiumResponse.convertEntityToResponse(null, false);
+            }
+        }
+
+        return UserPremiumResponse.convertEntityToResponse(optionalUserPremium.get(), true);}
 }

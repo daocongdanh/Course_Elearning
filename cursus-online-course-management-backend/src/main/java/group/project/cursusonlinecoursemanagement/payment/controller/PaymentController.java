@@ -166,7 +166,7 @@ public class PaymentController {
             BigDecimal totalPrice = new BigDecimal(request.getParameter("price"));
             int durationMonths = Integer.parseInt(request.getParameter("duration"));
             userPremiumService.createUserPremium(userId, totalPrice, durationMonths);
-            response.sendRedirect("http://localhost:3000/dashboard");
+            response.sendRedirect("http://localhost:3000/home");
         }
 
         return new ResponseEntity<>("Payment successful", HttpStatus.OK);
@@ -175,7 +175,7 @@ public class PaymentController {
     @GetMapping("/cancel")
     public ResponseEntity<?> handlePaymentCancel(HttpServletRequest request, HttpServletResponse response)
             throws IOException{
-        response.sendRedirect("http://localhost:3000/dashboard");
+        response.sendRedirect("http://localhost:3000/home");
         return new ResponseEntity<>("Payment cancel", HttpStatus.OK);
     }
 }
