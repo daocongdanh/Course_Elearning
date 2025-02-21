@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -43,6 +44,9 @@ public class PaymentController {
     private final APIContext apiContext;
     private final EnrollmentService enrollmentService;
     private final UserPremiumService userPremiumService;
+
+    @Value("${domain.frontend}")
+    private String domainFrontend;
     public PaymentController(PaymentService paymentService, APIContext apiContext,
                              EnrollmentService enrollmentService,
                              UserPremiumService userPremiumService) {
@@ -159,14 +163,14 @@ public class PaymentController {
                     .courseId(courseId)
                     .userId(userId)
                     .build());
-            response.sendRedirect("http://localhost:3000/dashboard");
+            response.sendRedirect(domainFrontend + "/dashboard");
         }
         else if(type.equals("premium")){
             UUID userId = UUID.fromString(request.getParameter("userId"));
             BigDecimal totalPrice = new BigDecimal(request.getParameter("price"));
             int durationMonths = Integer.parseInt(request.getParameter("duration"));
             userPremiumService.createUserPremium(userId, totalPrice, durationMonths);
-            response.sendRedirect("http://localhost:3000/home");
+            response.sendRedirect(domainFrontend + "/home");
         }
 
         return new ResponseEntity<>("Payment successful", HttpStatus.OK);
@@ -175,7 +179,7 @@ public class PaymentController {
     @GetMapping("/cancel")
     public ResponseEntity<?> handlePaymentCancel(HttpServletRequest request, HttpServletResponse response)
             throws IOException{
-        response.sendRedirect("http://localhost:3000/home");
+        response.sendRedirect(domainFrontend + "/home");
         return new ResponseEntity<>("Payment cancel", HttpStatus.OK);
     }
 }
